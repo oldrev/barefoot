@@ -18,6 +18,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -166,7 +167,7 @@ public class KState<C extends StateCandidate<C, T, S>, T extends StateTransition
      * @return List with the sequence of measurements.
      */
     public List<S> samples() {
-        LinkedList<S> samples = new LinkedList<>();
+        ArrayList<S> samples = new ArrayList<>();
         for (Tuple<Set<C>, S> element : sequence) {
             samples.add(element.two());
         }
@@ -290,17 +291,18 @@ public class KState<C extends StateCandidate<C, T, S>, T extends StateTransition
             }
         }
 
-        LinkedList<C> ksequence = new LinkedList<>();
+        ArrayList<C> ksequence = new ArrayList<>();
 
         for (int i = sequence.size() - 1; i >= 0; --i) {
             if (kestimate != null) {
-                ksequence.push(kestimate);
+                ksequence.add(kestimate);
                 kestimate = kestimate.predecessor();
             } else {
-                ksequence.push(sequence.get(i).one().iterator().next());
+                ksequence.add(sequence.get(i).one().iterator().next());
                 assert (sequence.get(i).one().size() == 1);
             }
         }
+        Collections.reverse(ksequence);
 
         return ksequence;
     }

@@ -194,7 +194,10 @@ public class Matcher extends Filter<MatcherCandidate, MatcherTransition, Matcher
         }
 
         Set<Tuple<MatcherCandidate, Double>> candidates = new HashSet<>();
-        logger.debug("{} ({}) candidates", points.size(), points_.size());
+
+        if (logger.isTraceEnabled()) {
+            logger.debug("{} ({}) candidates", points.size(), points_.size());
+        }
 
         for (RoadPoint point : points) {
             double dz = spatial.distance(sample.point(), point.geometry());
@@ -211,7 +214,9 @@ public class Matcher extends Filter<MatcherCandidate, MatcherTransition, Matcher
             MatcherCandidate candidate = new MatcherCandidate(sample.id(), point);
             candidates.add(new Tuple<>(candidate, emission));
 
-            logger.trace("{} {} {}", candidate.id(), dz, emission);
+            if (logger.isTraceEnabled()) {
+                logger.trace("{} {} {}", candidate.id(), dz, emission);
+            }
         }
 
         return candidates;
@@ -266,7 +271,9 @@ public class Matcher extends Filter<MatcherCandidate, MatcherTransition, Matcher
                             router.route(predecessor.point(), targets, cost, new Distance(), bound);
                     sw.stop();
 
-                    logger.trace("{} routes ({} ms)", routes.size(), sw.ms());
+                    if (logger.isTraceEnabled()) {
+                        logger.trace("{} routes ({} ms)", routes.size(), sw.ms());
+                    }
 
                     for (MatcherCandidate candidate : candidates.two()) {
                         List<Road> edges = routes.get(candidate.point());
@@ -292,8 +299,10 @@ public class Matcher extends Filter<MatcherCandidate, MatcherTransition, Matcher
 
                         map.put(candidate, new Tuple<>(new MatcherTransition(route), transition));
 
-                        logger.trace("{} -> {} {} {} {}", predecessor.id(), candidate.id(), base,
-                                route.length(), transition);
+                        if (logger.isTraceEnabled()) {
+                            logger.trace("{} -> {} {} {} {}", predecessor.id(), candidate.id(), base,
+                                    route.length(), transition);
+                        }
                         count.incrementAndGet();
                     }
 
@@ -307,7 +316,9 @@ public class Matcher extends Filter<MatcherCandidate, MatcherTransition, Matcher
 
         sw.stop();
 
-        logger.trace("{} transitions ({} ms)", count.get(), sw.ms());
+        if (logger.isTraceEnabled()) {
+            logger.trace("{} transitions ({} ms)", count.get(), sw.ms());
+        }
 
         return transitions;
     }

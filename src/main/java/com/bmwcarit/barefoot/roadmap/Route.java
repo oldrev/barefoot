@@ -13,8 +13,8 @@
 
 package com.bmwcarit.barefoot.roadmap;
 
-import java.util.LinkedList;
 import java.util.List;
+import java.util.ArrayList;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -33,8 +33,8 @@ import com.esri.core.geometry.Polyline;
 public class Route extends Path<Road> {
     private final static SpatialOperator spatial = new Geography();
 
-    private Double length = null;
-    private Double time = null;
+    private double length = Double.NaN;
+    private double time = Double.NaN;
 
     /**
      * Creates a {@link Route} object. (This is a base case that consists of only one
@@ -83,7 +83,7 @@ public class Route extends Path<Road> {
      * @return Length of the {@link Route} in meters.
      */
     public double length() {
-        if (length != null) {
+        if (!Double.isNaN(length)) {
             return length;
         } else {
             length = this.cost(new Distance());
@@ -98,7 +98,7 @@ public class Route extends Path<Road> {
      * @return Travel time of the {@link Route} in seconds.
      */
     public double time() {
-        if (time != null) {
+        if (!Double.isNaN(time)) {
             return time;
         } else {
             time = cost(new Time());
@@ -118,8 +118,8 @@ public class Route extends Path<Road> {
 
     @Override
     public boolean add(Path<Road> other) {
-        time = null;
-        length = null;
+        time = Double.NaN;
+        length = Double.NaN;
         return super.add(other);
     }
 
@@ -210,7 +210,7 @@ public class Route extends Path<Road> {
      * @throws JSONException thrown on JSON extraction or parsing error.
      */
     public static Route fromJSON(JSONObject json, RoadMap map) throws JSONException {
-        LinkedList<Road> roads = new LinkedList<>();
+        ArrayList<Road> roads = new ArrayList<>();
 
         JSONObject jsontarget = json.getJSONObject("target");
         JSONObject jsonsource = json.getJSONObject("source");

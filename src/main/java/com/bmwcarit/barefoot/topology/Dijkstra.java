@@ -14,10 +14,11 @@
 package com.bmwcarit.barefoot.topology;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.ArrayList;;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -119,8 +120,10 @@ public class Dijkstra<E extends AbstractEdge<E>, P extends Point<E>> implements 
          */
         Map<E, Set<P>> targetEdges = new HashMap<>();
         for (P target : targets) {
-            logger.trace("initialize target {} with edge {} and fraction {}", target,
-                    target.edge().id(), target.fraction());
+            if (logger.isTraceEnabled()) {
+                logger.trace("initialize target {} with edge {} and fraction {}", target,
+                        target.edge().id(), target.fraction());
+            }
 
             if (!targetEdges.containsKey(target.edge())) {
                 targetEdges.put(target.edge(), new HashSet<>(Arrays.asList(target)));
@@ -146,8 +149,10 @@ public class Dijkstra<E extends AbstractEdge<E>, P extends Point<E>> implements 
             double startbound =
                     bound != null ? bound.cost(source.edge(), 1 - source.fraction()) : 0.0;
 
-            logger.trace("init source {} with start edge {} and fraction {} with {} cost", source,
-                    source.edge().id(), source.fraction(), startcost);
+            if (logger.isTraceEnabled()) {
+                logger.trace("init source {} with start edge {} and fraction {} with {} cost", source,
+                        source.edge().id(), source.fraction(), startcost);
+            }
 
             if (targetEdges.containsKey(source.edge())) { // start edge reaches target edge
                 for (P target : targetEdges.get(source.edge())) {
@@ -158,9 +163,11 @@ public class Dijkstra<E extends AbstractEdge<E>, P extends Point<E>> implements 
                     double reachbound = bound != null
                             ? startcost - bound.cost(source.edge(), 1 - target.fraction()) : 0.0;
 
-                    logger.trace("reached target {} with start edge {} from {} to {} with {} cost",
-                            target, source.edge().id(), source.fraction(), target.fraction(),
-                            reachcost);
+                    if (logger.isTraceEnabled()) {
+                        logger.trace("reached target {} with start edge {} from {} to {} with {} cost",
+                                target, source.edge().id(), source.fraction(), target.fraction(),
+                                reachcost);
+                    }
 
                     Mark reach = new Mark(source.edge(), null, reachcost, reachbound);
                     reaches.put(reach, target);
@@ -171,16 +178,20 @@ public class Dijkstra<E extends AbstractEdge<E>, P extends Point<E>> implements 
 
             Mark start = entries.get(source.edge());
             if (start == null) {
-                logger.trace("add source {} with start edge {} and fraction {} with {} cost",
-                        source, source.edge().id(), source.fraction(), startcost);
+                if (logger.isTraceEnabled()) {
+                    logger.trace("add source {} with start edge {} and fraction {} with {} cost",
+                            source, source.edge().id(), source.fraction(), startcost);
+                }
 
                 start = new Mark(source.edge(), null, startcost, startbound);
                 entries.put(source.edge(), start);
                 starts.put(start, source);
                 priorities.add(start);
             } else if (startcost < start.three()) {
-                logger.trace("update source {} with start edge {} and fraction {} with {} cost",
-                        source, source.edge().id(), source.fraction(), startcost);
+                if (logger.isTraceEnabled()) {
+                    logger.trace("update source {} with start edge {} and fraction {} with {} cost",
+                            source, source.edge().id(), source.fraction(), startcost);
+                }
 
                 start = new Mark(source.edge(), null, startcost, startbound);
                 entries.put(source.edge(), start);
@@ -197,12 +208,16 @@ public class Dijkstra<E extends AbstractEdge<E>, P extends Point<E>> implements 
             Mark current = priorities.poll();
 
             if (targetEdges.isEmpty()) {
-                logger.trace("finshed all targets");
+                if (logger.isTraceEnabled()) {
+                    logger.trace("finshed all targets");
+                }
                 break;
             }
 
             if (max != null && current.four() > max) {
-                logger.trace("reached maximum bound");
+                if (logger.isTraceEnabled()) {
+                    logger.trace("reached maximum bound");
+                }
                 break;
             }
 
@@ -215,8 +230,10 @@ public class Dijkstra<E extends AbstractEdge<E>, P extends Point<E>> implements 
                 if (finishs.containsKey(target)) {
                     continue;
                 } else {
-                    logger.trace("finished target {} with edge {} and fraction {} with {} cost",
-                            target, current.one(), target.fraction(), current.three());
+                    if (logger.isTraceEnabled()) {
+                        logger.trace("finished target {} with edge {} and fraction {} with {} cost",
+                                target, current.one(), target.fraction(), current.three());
+                    }
 
                     finishs.put(target, current);
 
@@ -230,7 +247,9 @@ public class Dijkstra<E extends AbstractEdge<E>, P extends Point<E>> implements 
                 }
             }
 
-            logger.trace("succeed edge {} with {} cost", current.one().id(), current.three());
+            if (logger.isTraceEnabled()) {
+                logger.trace("succeed edge {} with {} cost", current.one().id(), current.three());
+            }
 
             Iterator<E> successors = current.one().successors();
 
@@ -246,9 +265,11 @@ public class Dijkstra<E extends AbstractEdge<E>, P extends Point<E>> implements 
                         double reachbound = bound != null
                                 ? succbound - bound.cost(successor, 1 - target.fraction()) : 0.0;
 
-                        logger.trace(
-                                "reached target {} with successor edge {} and fraction {} with {} cost",
-                                target, successor.id(), target.fraction(), reachcost);
+                        if (logger.isTraceEnabled()) {
+                            logger.trace(
+                                    "reached target {} with successor edge {} and fraction {} with {} cost",
+                                    target, successor.id(), target.fraction(), reachcost);
+                        }
 
                         Mark reach = new Mark(successor, current.one(), reachcost, reachbound);
                         reaches.put(reach, target);
@@ -257,7 +278,9 @@ public class Dijkstra<E extends AbstractEdge<E>, P extends Point<E>> implements 
                 }
 
                 if (!entries.containsKey(successor)) {
-                    logger.trace("added successor edge {} with {} cost", successor.id(), succcost);
+                    if (logger.isTraceEnabled()) {
+                        logger.trace("added successor edge {} with {} cost", successor.id(), succcost);
+                    }
                     Mark mark = new Mark(successor, current.one(), succcost, succbound);
 
                     entries.put(successor, mark);
@@ -272,14 +295,15 @@ public class Dijkstra<E extends AbstractEdge<E>, P extends Point<E>> implements 
             if (!finishs.containsKey(target)) {
                 paths.put(target, null);
             } else {
-                LinkedList<E> path = new LinkedList<>();
+                ArrayList<E> path = new ArrayList<>();
                 Mark iterator = finishs.get(target);
                 Mark start = null;
                 while (iterator != null) {
-                    path.addFirst(iterator.one());
+                    path.add(iterator.one());
                     start = iterator;
                     iterator = iterator.two() != null ? entries.get(iterator.two()) : null;
                 }
+                Collections.reverse(path);
                 paths.put(target, new Tuple<P, List<E>>(starts.get(start), path));
             }
         }

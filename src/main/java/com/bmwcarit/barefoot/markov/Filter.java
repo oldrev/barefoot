@@ -125,7 +125,9 @@ public abstract class Filter<C extends StateCandidate<C, T, S>, T extends StateT
 
         Set<C> result = new HashSet<>();
         Set<Tuple<C, Double>> candidates = candidates(predecessors, sample);
-        logger.trace("{} state candidates", candidates.size());
+        if (logger.isTraceEnabled()) {
+            logger.trace("{} state candidates", candidates.size());
+        }
 
         double normsum = 0;
 
@@ -184,12 +186,15 @@ public abstract class Filter<C extends StateCandidate<C, T, S>, T extends StateT
                     }
                 }
 
-                if (candidate_.predecessor() != null) {
-                    logger.trace("state candidate {} -> {} ({}, {})", candidate_.predecessor().id(),
-                            candidate_.id(), candidate_.filtprob(), candidate_.seqprob());
-                } else {
-                    logger.trace("state candidate - -> {} ({}, {})", candidate_.id(),
-                            candidate_.filtprob(), candidate_.seqprob());
+                if (logger.isTraceEnabled()) {
+                    if (candidate_.predecessor() != null) {
+                        logger.trace("state candidate {} -> {} ({}, {})", candidate_.predecessor().id(),
+                                candidate_.id(), candidate_.filtprob(), candidate_.seqprob());
+                    }
+                    else {
+                        logger.trace("state candidate - -> {} ({}, {})", candidate_.id(),
+                                candidate_.filtprob(), candidate_.seqprob());
+                    }
                 }
 
 
@@ -239,7 +244,9 @@ public abstract class Filter<C extends StateCandidate<C, T, S>, T extends StateT
             candidate.filtprob(candidate.filtprob() / normsum);
         }
 
-        logger.trace("{} state candidates for state update", result.size());
+        if (logger.isTraceEnabled()) {
+            logger.trace("{} state candidates for state update", result.size());
+        }
         return result;
     }
 }
