@@ -66,6 +66,7 @@ public class Matcher extends Filter<MatcherCandidate, MatcherTransition, Matcher
     private double lambda = 0d;
     private double radius = 200;
     private double distance = 15000;
+    private float maxVelocity = 130.0f / 3.6f;
 
     /**
      * Creates a HMM map matching filter for some map, router, cost function, and spatial operator.
@@ -163,6 +164,24 @@ public class Matcher extends Filter<MatcherCandidate, MatcherTransition, Matcher
         this.distance = distance;
     }
 
+    /**
+     * Gets maximum transition velocity in meters per second.
+     *
+     * @return Maximum transition velocity in meters per second.
+     */
+    public float getMaxVelocity() {
+        return this.maxVelocity;
+    }
+
+    /**
+     * Sets maximum transition velocity in meters per second (default is 36.1 meters per second).
+     *
+     * @param distance Maximum transition distance in meters.
+     */
+    public void setMaxVelocity(float maxVelocity) {
+        this.maxVelocity = maxVelocity;
+    }
+
     @Override
     protected Set<Tuple<MatcherCandidate, Double>> candidates(Set<MatcherCandidate> predecessors,
             MatcherSample sample) {
@@ -249,10 +268,10 @@ public class Matcher extends Filter<MatcherCandidate, MatcherTransition, Matcher
         final AtomicInteger count = new AtomicInteger();
         final Map<MatcherCandidate, Map<MatcherCandidate, Tuple<MatcherTransition, Double>>> transitions =
                 new ConcurrentHashMap<>();
-        final double base =
-                1.0 * spatial.distance(predecessors.one().point(), candidates.one().point()) / 60;
-        final double bound = Math.max(1000d, Math.min(distance,
-                ((candidates.one().time() - predecessors.one().time()) / 1000) * 100));
+        final double candidatesInterval = (double)(candidates.one().time() - predecessors.one().time());
+        final double candidatesDistance = spatial.distance(predecessors.one().point(), candidates.one().point());
+        final double base = 1.0 * candidatesDistance  / 60;
+        final double bound = Math.max((double)this.maxVelocity, Math.min(distance, (candidatesInterval / 1000) * (double)this.maxVelocity));
 
         InlineScheduler scheduler = StaticScheduler.scheduler();
         for (final MatcherCandidate predecessor : predecessors.two()) {
